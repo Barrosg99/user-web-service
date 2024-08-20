@@ -1,6 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
+
+export enum UserDocType {
+  CPF = 'cpf',
+  RG = 'rg',
+}
+
+registerEnumType(UserDocType, { name: 'UserDocType' });
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -14,11 +21,25 @@ export class User {
 
   @Field()
   @Prop({ required: true })
-  doc: string;
+  email: string;
+
+  @Prop({ required: true })
+  password: string;
 
   @Field()
   @Prop({ required: true })
-  docType: string;
+  doc: string;
+
+  @Field(() => UserDocType)
+  @Prop({
+    type: String,
+    enum: {
+      values: Object.values(UserDocType),
+      message: '{VALUE} is not supported',
+    },
+    required: true,
+  })
+  docType: UserDocType;
 
   @Field(() => Date)
   createdAt: Date;
