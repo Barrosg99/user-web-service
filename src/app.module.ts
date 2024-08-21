@@ -6,7 +6,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserModule } from './user/user.module';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -29,14 +29,27 @@ import { JwtModule } from '@nestjs/jwt';
       inject: [ConfigService],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
+      context: ({ req }) => {
+        const jwtService = new JwtService({
+          secret: process.env.JWT_SECRET,
+        });
+
+        const authHeader = req.headers.authorization;
+
+        if (authHeader) {
+          const token = authHeader;
+          try {
+            const decoded = jwtService.verify(token);
+            return { userId: decoded.user.id };
+          } catch (err) {
+            throw new Error('Token Inválido');
+          }
+        }
+      },
       driver: ApolloDriver,
       autoSchemaFile: true,
       playground: false,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
-    }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'defaultSecretKey',
-      signOptions: { expiresIn: '1h' },
     }),
     UserModule,
   ],

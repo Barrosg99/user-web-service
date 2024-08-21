@@ -7,6 +7,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoggedUserDto, LoggedUserResponse } from './dto/logged-user.dto';
 import { JwtService } from '@nestjs/jwt';
 
+const saltOrRounds = 10;
+
 @Injectable()
 export class UserService {
   constructor(
@@ -15,7 +17,6 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const saltOrRounds = 10;
     createUserDto.password = await bcrypt.hash(
       createUserDto.password,
       saltOrRounds,
@@ -26,18 +27,22 @@ export class UserService {
   }
 
   async login(login: LoggedUserDto): Promise<LoggedUserResponse> {
-    // testar mutation de login
-    const user = await this.userModel.findOne(login);
+    const { email, password } = login;
+    const user = await this.userModel.findOne({ email });
 
-    if (!user) {
-      throw new Error('Invalid credentials.');
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+      throw new Error('Email or password invalid.')
     }
 
-    const payload = { username: user.email, id: user.id };
+    const payload = { user: { id: user.id } };
     const token = this.jwtService.sign(payload);
 
     return {
       token,
     };
+  }
+
+  async findOne(id: string): Promise<User> {
+    return this.userModel.findById(id);
   }
 }

@@ -6,7 +6,7 @@ export class LoggedUserDto {
   readonly email: string;
 
   @Field()
-  readonly password: string;
+  password: string;
 }
 
 @ObjectType()
