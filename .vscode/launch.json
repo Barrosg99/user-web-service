@@ -4,7 +4,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Nest Framework",
+      "name": "Run users subgraphQL",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
