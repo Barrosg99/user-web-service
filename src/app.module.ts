@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import {
-  ApolloDriver,
-  ApolloDriverConfig,
   ApolloFederationDriver,
   ApolloFederationDriverConfig,
 } from '@nestjs/apollo';
@@ -11,7 +9,6 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserModule } from './user/user.module';
-import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -36,21 +33,8 @@ import { JwtService } from '@nestjs/jwt';
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
       context: ({ req }) => {
-        const jwtService = new JwtService({
-          secret: process.env.JWT_SECRET,
-        });
-
-        const authHeader = req.headers.authorization;
-
-        if (authHeader) {
-          const token = authHeader;
-          try {
-            const decoded = jwtService.verify(token);
-            return { userId: decoded.user.id };
-          } catch (err) {
-            throw new Error('Token Inválido');
-          }
-        }
+        const userId = req.headers['user-id'];
+        if (userId) return { userId }; 
       },
       autoSchemaFile: true,
       playground: false,

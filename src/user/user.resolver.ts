@@ -10,7 +10,7 @@ export class UserResolver {
 
   @Query((returns) => User)
   async me(@Context('userId') userId: string) {
-    console.log(userId);
+    if(!userId) throw new Error('You must be logged to execute this action.')
 
     return this.usersService.findOne(userId);
   }
