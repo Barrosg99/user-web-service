@@ -1,4 +1,12 @@
-import { Args, Context, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Context,
+  ID,
+  Mutation,
+  Query,
+  Resolver,
+  ResolveReference,
+} from '@nestjs/graphql';
 import { User } from './models/user.model';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -10,7 +18,7 @@ export class UserResolver {
 
   @Query((returns) => User)
   async me(@Context('userId') userId: string) {
-    if(!userId) throw new Error('You must be logged to execute this action.')
+    if (!userId) throw new Error('You must be logged to execute this action.');
 
     return this.usersService.findOne(userId);
   }
@@ -25,5 +33,13 @@ export class UserResolver {
     const loginData = await this.usersService.login(userLoginData);
 
     return loginData;
+  }
+
+  @ResolveReference()
+  resolveReference(reference: {
+    __typename: string;
+    id: string;
+  }): Promise<User> {
+    return this.usersService.findOne(reference.id);
   }
 }
