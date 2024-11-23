@@ -28,6 +28,14 @@ export class UserResolver {
     return this.usersService.create(createUserData);
   }
 
+  @Mutation((returns) => User)
+  async updateMe(
+    @Context('userId') userId: string,
+    @Args('userData') userData: CreateUserDto,
+  ) {
+    return this.usersService.edit(userData, userId);
+  }
+
   @Mutation((returns) => LoggedUserResponse)
   async login(@Args('userLoginData') userLoginData: LoggedUserDto) {
     const loginData = await this.usersService.login(userLoginData);
