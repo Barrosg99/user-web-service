@@ -11,5 +11,18 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-app
+    ports:
+      - '${PORT}:${PORT}' 
+    environment:
+      PORT: ${PORT} 
+      MONGO_URI: mongodb://mongo:senha123@mongodb:27017
+    depends_on:
+      - mongodb
+
 volumes:
   mongodb_data:

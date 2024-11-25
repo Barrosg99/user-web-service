@@ -9,6 +9,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserModule } from './user/user.module';
+import { HealthController } from './app.controller';
 
 @Module({
   imports: [
@@ -25,7 +26,9 @@ import { UserModule } from './user/user.module';
         const mongoDB = configService.get<string>('MONGO_DB');
 
         return {
-          uri: `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDB}?authSource=admin`,
+          uri:
+            configService.get<string>('MONGO_URI') ||
+            `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDB}?authSource=admin`,
         };
       },
       inject: [ConfigService],
@@ -34,7 +37,7 @@ import { UserModule } from './user/user.module';
       driver: ApolloFederationDriver,
       context: ({ req }) => {
         const userId = req.headers['user-id'];
-        if (userId) return { userId }; 
+        if (userId) return { userId };
       },
       autoSchemaFile: true,
       playground: false,
@@ -42,5 +45,6 @@ import { UserModule } from './user/user.module';
     }),
     UserModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}
